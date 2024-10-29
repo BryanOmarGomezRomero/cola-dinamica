@@ -1,0 +1,145 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Clase que representa la solicitud de constancia de estudio de un alumno
+class Solicitud {
+public:
+    string nombreAlumno;  // Nombre del alumno
+    string carrera;       // Carrera que cursa el alumno
+    int totalMaterias;    // Total de materias aprobadas por el alumno
+    float promedio;       // Promedio general del alumno
+
+    // Constructor de la clase Solicitud
+    Solicitud(string nombreAlumno, string carrera, int totalMaterias, float promedio)
+        : nombreAlumno(nombreAlumno), carrera(carrera), totalMaterias(totalMaterias), promedio(promedio) {}
+
+    // Sobrecarga del operador << para imprimir la información de la solicitud
+    friend ostream& operator<<(ostream& os, const Solicitud& solicitud) {
+        os << "Alumno: " << solicitud.nombreAlumno
+           << ", Carrera: " << solicitud.carrera
+           << ", Total Materias Aprobadas: " << solicitud.totalMaterias
+           << ", Promedio: " << solicitud.promedio;
+        return os;
+    }
+};
+
+// Clase Nodo que representa cada elemento (nodo) de la cola
+class Nodo {
+public:
+    Solicitud data;       // Dato que almacena el nodo (una solicitud de constancia)
+    Nodo* siguiente;      // Puntero al siguiente nodo en la cola
+
+    // Constructor del nodo que inicializa el dato y establece el siguiente nodo como nullptr
+    Nodo(Solicitud data) : data(data), siguiente(nullptr) {}
+};
+
+// Clase ColaDinamica que implementa una cola dinámica usando nodos enlazados
+class ColaDinamica {
+private:
+    Nodo* frente; // Puntero al primer nodo de la cola
+    Nodo* final;  // Puntero al último nodo de la cola
+
+public:
+    // Constructor que inicializa una cola vacía
+    ColaDinamica() : frente(nullptr), final(nullptr) {}
+
+    // Destructor que elimina todos los nodos de la cola para liberar memoria
+    ~ColaDinamica() {
+        while (!vacia()) {
+            desencolar(); // Desencola cada nodo hasta que la cola esté vacía
+        }
+    }
+
+    // Método para verificar si la cola está vacía
+    bool vacia() const {
+        return frente == nullptr;
+    }
+
+    // Método para encolar (añadir al final) una nueva solicitud
+    void encolar(const Solicitud& solicitud) {
+        Nodo* nuevoNodo = new Nodo(solicitud); // Crear un nuevo nodo con la solicitud
+        if (vacia()) {
+            // Si la cola está vacía, tanto frente como final apuntan al nuevo nodo
+            frente = final = nuevoNodo;
+        } else {
+            // Si no está vacía, el nodo final apunta al nuevo nodo y actualizamos final
+            final->siguiente = nuevoNodo;
+            final = nuevoNodo;
+        }
+        cout << "Solicitud encolada exitosamente.\n";
+    }
+
+    // Método para desencolar (eliminar del frente) una solicitud
+    void desencolar() {
+        if (vacia()) {
+            cout << "No hay solicitudes en la cola.\n";
+            return;
+        }
+        Nodo* temp = frente; // Guardamos el nodo en el frente de la cola
+        frente = frente->siguiente; // Avanzamos frente al siguiente nodo
+        cout << "Elaborando constancia para:\n" << temp->data << endl;
+        delete temp; // Liberamos la memoria del nodo desencolado
+        if (frente == nullptr) { // Si la cola está vacía después de desencolar
+            final = nullptr;
+        }
+    }
+
+    // Método para mostrar la solicitud en el frente de la cola sin desencolarla
+    void mostrarFrente() const {
+        if (vacia()) {
+            cout << "No hay solicitudes en la cola.\n";
+        } else {
+            cout << "Solicitud en el frente:\n" << frente->data << endl;
+        }
+    }
+};
+
+int main() {
+    ColaDinamica cola; // Creamos un objeto de tipo ColaDinamica para manejar las solicitudes
+    int opcion;
+    string nombre, carrera;
+    int totalMaterias;
+    float promedio;
+
+    do {
+        // Menú de opciones para el usuario
+        cout << "\nMenu:\n";
+        cout << "1. Dar de alta la solicitud de un alumno\n";
+        cout << "2. Elaborar una constancia\n";
+        cout << "3. Mostrar solicitud en el frente\n";
+        cout << "4. Salir\n";
+        cout << "Ingrese una opcion: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                // Opción 1: Alta de solicitud, pide los datos y los encola
+                cout << "Ingrese nombre del alumno: ";
+                cin >> nombre;
+                cout << "Ingrese carrera: ";
+                cin >> carrera;
+                cout << "Ingrese total de materias aprobadas: ";
+                cin >> totalMaterias;
+                cout << "Ingrese promedio: ";
+                cin >> promedio;
+                cola.encolar(Solicitud(nombre, carrera, totalMaterias, promedio));
+                break;
+            case 2:
+                // Opción 2: Elaborar constancia, desencola el frente de la cola
+                cola.desencolar();
+                break;
+            case 3:
+                // Opción 3: Muestra la solicitud en el frente sin desencolarla
+                cola.mostrarFrente();
+                break;
+            case 4:
+                cout << "Saliendo del programa..." << endl;
+                break;
+            default:
+                cout << "Opcion no valida." << endl;
+        }
+    } while (opcion != 4);
+
+    return 0;
+}
